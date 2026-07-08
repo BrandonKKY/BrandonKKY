@@ -1,6 +1,6 @@
 ### Building systematic trading infrastructure — from execution engines to numerical pricing tools to the risk layer that ties them together — with every claim backed by out-of-sample proof.
 
-Four projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, and a risk-attribution dashboard that unifies the first two into a single book. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data.
+Five projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, a risk-attribution dashboard that unifies the first two into a single book, and a text-analytics research framework testing whether Federal Reserve communications carry exploitable market signal. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data.
 
 ---
 
@@ -55,9 +55,23 @@ A Python/Streamlit dashboard that ingests the real log files from the two live s
 
 ---
 
+### [fed-sentiment-research](https://github.com/BrandonKKY/fed-sentiment-research) — FOMC Sentiment Research
+
+A Python research framework that extracts hawkish/dovish sentiment from all FOMC statements and meeting minutes (2006–2026) and tests whether that signal predicts anything in equity or bond markets. The only text-based project in this portfolio — every other entry works on price and volume.
+
+- Two independent scoring methods: a direction-word × policy-noun lexicon transcribed from Apel & Blix Grimaldi (Riksbank WP 261, 2012), and PPMI-SVD word embeddings (Levy & Goldberg 2014) built from scratch in numpy and trained *only on pre-2015 text* — preventing the training-data look-ahead contamination a pretrained model would have carried
+- Primary hypothesis and all hyperparameters pre-registered in code before any correlation was computed — the strictest available guard against p-hacking
+- **Measurement validated:** extended-lexicon hawkishness co-moves with same-day 2y/10y Treasury yield changes in *both* the train and test split (test: r = +0.49 / +0.52), surviving Bonferroni correction — the market reaction to FOMC communication is real and replicable
+- **Prediction null:** 0 of 108 forward-looking hypotheses survive correction in either split; the top-5 in-sample correlations fail to replicate out of sample (3 of 5 flip sign); the pre-registered primary hypothesis fails outright with a sign flip from train to test
+- **34/34** tests passing; FOMC minutes timestamped by their verified public release date (19–24 days after the meeting), not the meeting date, closing a real look-ahead trap that a naive implementation would miss
+
+**The honest part:** the null result is the point. The market prices FOMC communication within the trading day — the yield reaction is contemporaneous and complete. Nothing survives at 1/5/21-day forward horizons. That finding is reported as a rigorous null rather than retrofitted into a weaker positive claim.
+
+---
+
 ### Research Philosophy
 
-Every result across these four projects is walk-forward or convergence validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep or a pair-screen could otherwise mistake luck for edge. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the four repos, six of which concluded "reject," because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics and the trading system's bit-exact regression gate serve the same purpose from opposite directions — proving the math is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
+Every result across these five projects is walk-forward or convergence validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep or a pair-screen could otherwise mistake luck for edge. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the five repos — plus 108 pre-registered forward hypotheses in the sentiment project, all of which concluded "reject" — because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics and the trading system's bit-exact regression gate serve the same purpose from opposite directions — proving the math is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
 
 ---
 
@@ -65,11 +79,11 @@ Every result across these four projects is walk-forward or convergence validated
 
 **Languages & Tooling:** C++17, Python, CMake, GitHub Actions/CI, Git, Streamlit
 
-**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²)
+**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, pre-registered hypothesis testing, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²), event study methodology, lexicon-based sentiment scoring, word embeddings (PPMI-SVD)
 
 **Systems & Infrastructure:** Live broker integration (Alpaca REST API), risk management systems (circuit breakers, position reconciliation, bracket-order management), bit-exact regression testing, cross-system risk attribution (flow-adjusted drawdown attribution across heterogeneous P&L feeds)
 
-**Data & Analysis:** pandas, statsmodels, Jupyter
+**Data & Analysis:** pandas, statsmodels, scipy, Jupyter, NLP/text analysis (BeautifulSoup, PPMI-SVD embeddings)
 
 ---
 
