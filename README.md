@@ -109,5 +109,5 @@ Running QuantBot live in Alpaca's paper-trading environment, monitoring the Vari
 
 ### Contact
 
-LinkedIn: [linkedin.com/in/your-handle-here](https://linkedin.com/in/your-handle-here)
-Email: your-email@example.com
+- LinkedIn: linkedin.com/in/brandon-kky/
+- Email: brandonkky@gmail.com
