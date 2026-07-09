@@ -1,6 +1,6 @@
 ### Building systematic trading infrastructure — from execution engines to numerical pricing tools to the risk layer that ties them together — with every claim backed by out-of-sample proof.
 
-Five projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, a risk-attribution dashboard that unifies the first two into a single book, and a text-analytics research framework testing whether Federal Reserve communications carry exploitable market signal. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data.
+Six projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, a risk-attribution dashboard that unifies the first two into a single book, a text-analytics research framework testing whether Federal Reserve communications carry exploitable market signal, and a C++ market microstructure simulator that steps outside price-taking entirely to show how those prices get made in the first place. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data. The order book simulator applies that same discipline in a different form: there's no p-value for "does the matching engine fill orders in the correct sequence," so a 12-test correctness gate stands in for the walk-forward split.
 
 ---
 
@@ -69,9 +69,23 @@ A Python research framework that extracts hawkish/dovish sentiment from all FOMC
 
 ---
 
+### [order-book-simulator](https://github.com/BrandonKKY/order-book-simulator) — C++ Limit Order Book Simulator
+
+A standalone C++17 matching engine, and the one project here that's different in kind rather than degree: every other repo above is a *price taker* — a strategy reacting to a market price that already exists. This one is a price *maker* — a price-time priority matching engine showing how that price gets formed in the first place, order by order, at the venue.
+
+- Price-time priority (FIFO) matching engine supporting limit, market, IOC, FOK, and GTC order types, plus self-trade prevention
+- Data structure choice documented with complexity tradeoffs *before* a line of matching code was written — `std::map` for price levels (ordered iteration required for matching, snapshots, and spread), `std::list` per level (O(1) mid-queue cancel with stable iterators, not `std::queue`), `std::unordered_map` for O(1) order lookup by ID
+- **12/12** correctness tests passing, including the classic FOK atomicity trap: an infeasible fill-or-kill order must generate **zero** trades before cancelling, not a partial fill followed by a cancel
+- Benchmarked at **3.4M insertions/sec**, **2.2M cancellations/sec**, **3.1M crossing-limit matches/sec** (MSVC /O2, single thread) — a software benchmark of the data structure's asymptotics, not an HFT latency claim
+- Zero external dependencies beyond the C++17 standard library
+
+**The honest part:** the stress test (#12) initially validated a book that the simulated market-order flow had swept completely empty — the final integrity check was technically passing, but checking nothing. Caught during verification and fixed by auditing the book at three phases (after inserts, after cancels, after market sweeps) instead of one, requiring a populated book at the final check. The matching engine itself needed zero fixes — the first full run of the gate was 12/12. The README is equally direct about what's absent for real HFT use: no lock-free structures, no kernel bypass, no co-location — the gap between "correct simulation" and "production trading infrastructure" is documented, not glossed over.
+
+---
+
 ### Research Philosophy
 
-Every result across these five projects is walk-forward or convergence validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep or a pair-screen could otherwise mistake luck for edge. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the five repos — plus 108 pre-registered forward hypotheses in the sentiment project, all of which concluded "reject" — because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics and the trading system's bit-exact regression gate serve the same purpose from opposite directions — proving the math is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
+Every result across these six projects is walk-forward, convergence, or correctness-gate validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep or a pair-screen could otherwise mistake luck for edge. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the six repos — plus 108 pre-registered forward hypotheses in the sentiment project, all of which concluded "reject" — because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics, the trading system's bit-exact regression gate, and the order book's 12-test correctness gate serve the same purpose from three different angles — proving the logic is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
 
 ---
 
@@ -79,9 +93,9 @@ Every result across these five projects is walk-forward or convergence validated
 
 **Languages & Tooling:** C++17, Python, CMake, GitHub Actions/CI, Git, Streamlit
 
-**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, pre-registered hypothesis testing, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²), event study methodology, lexicon-based sentiment scoring, word embeddings (PPMI-SVD)
+**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, pre-registered hypothesis testing, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²), event study methodology, lexicon-based sentiment scoring, word embeddings (PPMI-SVD), market microstructure, order flow imbalance (OFI)
 
-**Systems & Infrastructure:** Live broker integration (Alpaca REST API), risk management systems (circuit breakers, position reconciliation, bracket-order management), bit-exact regression testing, cross-system risk attribution (flow-adjusted drawdown attribution across heterogeneous P&L feeds)
+**Systems & Infrastructure:** Live broker integration (Alpaca REST API), risk management systems (circuit breakers, position reconciliation, bracket-order management), bit-exact regression testing, cross-system risk attribution (flow-adjusted drawdown attribution across heterogeneous P&L feeds), limit order book matching engine (price-time priority matching, self-trade prevention)
 
 **Data & Analysis:** pandas, statsmodels, scipy, Jupyter, NLP/text analysis (BeautifulSoup, PPMI-SVD embeddings)
 
