@@ -1,6 +1,6 @@
 ### Building systematic trading infrastructure — from execution engines to numerical pricing tools to the risk layer that ties them together — with every claim backed by out-of-sample proof.
 
-Six projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, a risk-attribution dashboard that unifies the first two into a single book, a text-analytics research framework testing whether Federal Reserve communications carry exploitable market signal, and a C++ market microstructure simulator that steps outside price-taking entirely to show how those prices get made in the first place. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data. The order book simulator applies that same discipline in a different form: there's no p-value for "does the matching engine fill orders in the correct sequence," so a 12-test correctness gate stands in for the walk-forward split.
+Seven projects below cover the full stack: a live trading system, a statistical arbitrage research framework, a derivatives pricing engine, a risk-attribution dashboard that unifies the first two into a single book, a text-analytics research framework testing whether Federal Reserve communications carry exploitable market signal, a gradient-boosting research framework testing whether technical and macro features predict short-term returns, and a C++ market microstructure simulator that steps outside price-taking entirely to show how those prices get made in the first place. The common thread isn't the returns — it's the discipline: walk-forward validation, multiple-testing correction, and honest rejection when a hypothesis — or a statistic — doesn't survive contact with held-out data. The order book simulator applies that same discipline in a different form: there's no p-value for "does the matching engine fill orders in the correct sequence," so a 12-test correctness gate stands in for the walk-forward split.
 
 ---
 
@@ -69,6 +69,20 @@ A Python research framework that extracts hawkish/dovish sentiment from all FOMC
 
 ---
 
+### [ml-alpha-research](https://github.com/BrandonKKY/ml-alpha-research) — Gradient Boosting Alpha Research
+
+A Python research framework testing whether gradient boosting on technical and macro features predicts 5-day forward returns across 50 US equities. The only ML project in this portfolio — every other repo works on linear models, cointegration, or rule-based logic.
+
+- Walk-forward cross-validation with an executable K-fold leakage proof: on synthetic data unpredictable by construction, K-fold reports IC **+0.224** from pure neighbor interpolation, while walk-forward correctly reports **≈0** — a working demonstration of one of the most common silent failure modes in quantitative ML research
+- Primary hypothesis pre-registered in the research report before any code was written, same discipline as fed-sentiment-research
+- Feature importance stability test passes its own **78%** rank-correlation gate across walk-forward windows — but **89%** of importance sits in VIX/credit/rates, features identical across all 50 stocks on any given day and therefore incapable of ranking them; flagged as an economic-sense **red flag** even though the stability metric itself passes
+- **9/9** look-ahead bias tests passing: feature-permutation audit, exact target-formula verification, CV purge-gap and train/test overlap checks, holdout isolation
+- Real FRED macro data — VIX, 10-year yield, yield-curve slope, credit spread — pulled via the keyless CSV endpoint; no proxy series needed
+
+**The honest part:** this is the third honest null result in this portfolio, alongside stat-arb-research and fed-sentiment-research. Gross long-short Sharpe of 1.00 in cross-validation collapses to **-1.34 net** on the untouched 2020–2024 holdout once realistic transaction costs are applied — the signal exists but lives inside the bid-ask spread. The K-fold leakage proof is the more important finding: it shows concretely why a large share of published ML-in-finance backtests are overfit without the researcher ever finding out.
+
+---
+
 ### [order-book-simulator](https://github.com/BrandonKKY/order-book-simulator) — C++ Limit Order Book Simulator
 
 A standalone C++17 matching engine, and the one project here that's different in kind rather than degree: every other repo above is a *price taker* — a strategy reacting to a market price that already exists. This one is a price *maker* — a price-time priority matching engine showing how that price gets formed in the first place, order by order, at the venue.
@@ -85,7 +99,7 @@ A standalone C++17 matching engine, and the one project here that's different in
 
 ### Research Philosophy
 
-Every result across these six projects is walk-forward, convergence, or correctness-gate validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep or a pair-screen could otherwise mistake luck for edge. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the six repos — plus 108 pre-registered forward hypotheses in the sentiment project, all of which concluded "reject" — because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics, the trading system's bit-exact regression gate, and the order book's 12-test correctness gate serve the same purpose from three different angles — proving the logic is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
+Every result across these seven projects is walk-forward, convergence, or correctness-gate validated before it's called a result — nothing here is a single cherry-picked backtest presented as a finding. Multiple-testing correction (Bonferroni) is applied wherever a sweep, a pair-screen, or a set of walk-forward OOS windows could otherwise mistake luck for edge — ml-alpha-research's five walk-forward windows plus its holdout all fail to clear that bar, and the result is reported as the null it is. Failure is reported with the same rigor as success: eleven-plus documented experiments and numerical checks across the seven repos — plus 108 pre-registered forward hypotheses in the sentiment project, all of which concluded "reject" — because that's what the out-of-sample data actually said. The pricing engine's cross-validated numerics, the trading system's bit-exact regression gate, the order book's 12-test correctness gate, and ml-alpha-research's 9-test look-ahead-bias audit serve the same purpose from four different angles — proving the logic is right before trusting what it implies. The risk dashboard applies the identical standard to the reporting layer itself: a Sharpe ratio or VaR figure carries a sample-size verdict, not a confident number standing alone.
 
 ---
 
@@ -93,7 +107,7 @@ Every result across these six projects is walk-forward, convergence, or correctn
 
 **Languages & Tooling:** C++17, Python, CMake, GitHub Actions/CI, Git, Streamlit
 
-**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, pre-registered hypothesis testing, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²), event study methodology, lexicon-based sentiment scoring, word embeddings (PPMI-SVD), market microstructure, order flow imbalance (OFI)
+**Quantitative Methods:** Walk-forward validation, Bonferroni multiple-testing correction, pre-registered hypothesis testing, cointegration testing (Engle-Granger, Johansen), Monte Carlo variance reduction (antithetic variates), Longstaff-Schwartz least-squares regression, Newton-Raphson root-finding, VaR/CVaR methodology, OLS factor regression (beta/alpha/R²), event study methodology, lexicon-based sentiment scoring, word embeddings (PPMI-SVD), market microstructure, order flow imbalance (OFI), gradient boosting (XGBoost/LightGBM), information coefficient (IC/ICIR), Newey-West standard errors, cross-sectional alpha research
 
 **Systems & Infrastructure:** Live broker integration (Alpaca REST API), risk management systems (circuit breakers, position reconciliation, bracket-order management), bit-exact regression testing, cross-system risk attribution (flow-adjusted drawdown attribution across heterogeneous P&L feeds), limit order book matching engine (price-time priority matching, self-trade prevention)
 
