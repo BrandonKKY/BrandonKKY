@@ -174,3 +174,116 @@ already live on GitHub, not numbers sitting only in an unpushed local copy.
 - **"Currently running QuantBot live"** line (Currently section) — not
   re-verified this session; same caveat as before, confirm the bot is still
   active or soften the line.
+
+---
+
+## 5. Session Update (2026-07-10) — Eighth Project Card Added
+
+### What changed
+
+Added `cross-sectional-momentum` as the eighth featured project card, matching
+the existing format exactly (title link + one-line descriptor, intro
+paragraph, bullet list of technical highlights, bolded **"The honest part:"**
+closing paragraph, `---` separator). Placed it **between ml-alpha-research and
+order-book-simulator**, not appended at the end — continuing the placement
+pattern from the prior session (§4): order-book-simulator's own pitch ("different
+in kind, not degree, from every other project here") reads best as the closing
+entry in the list, so new cards slot in before it rather than after.
+
+Updated every "seven projects" occurrence that referred to the project count:
+- Intro paragraph: "Seven projects" → "Eight projects," with one clause added
+  describing cross-sectional-momentum as "an academic-style cross-sectional
+  factor study testing the classic Jegadeesh-Titman momentum anomaly across
+  100+ US equities" — placed in the list in the same position as its card
+  (between the ml-alpha description and the order-book description).
+- Research Philosophy: "these seven projects" → "these eight projects," "the
+  seven repos" → "the eight repos." Added cross-sectional-momentum's
+  walk-forward result alongside ml-alpha-research's in the Bonferroni sentence
+  (both are five-window walk-forwards that fail to clear the bar — genuinely
+  parallel structure, not a stretch to pair them). Extended "four different
+  angles" → "five different angles" and added the project's 14-test integrity
+  suite to that list. Left "eleven-plus documented experiments" untouched —
+  per the existing convention (§4 of this report), that count is QuantBot's 5
+  rejected extensions + stat-arb's 6 experiments, and neither ml-alpha-research
+  nor cross-sectional-momentum's test suites belong in that bucket.
+- Technical Skills (Quantitative Methods): added `Fama-MacBeth regression` and
+  `factor decay analysis`. **Did not** add a separate `cross-sectional factor
+  research` term as literally listed in the task brief — `cross-sectional
+  alpha research` is already present in that line (added when ml-alpha-research
+  was carded) and putting a near-synonymous phrase directly next to it would
+  read as padding rather than a distinct skill. Confirmed `Newey-West standard
+  errors` was already present (also from the ml-alpha-research addition) — no
+  change needed there, per the brief's own instruction to confirm rather than
+  duplicate.
+
+### Numbers verified, not copied from the task brief
+
+Every figure in the new card was grepped out of the actual repo files in this
+session before writing the card, not taken from the task instructions on
+faith:
+
+- **Root-commit claim**: `git log --oneline --reverse` on
+  `cross-sectional-momentum` confirms `6b321fb "Pre-registration: hypothesis,
+  timeline, look-ahead risks (before any code)"` is genuinely the first commit,
+  predating `d241fb7` (the first commit containing any `.py` file). The card's
+  claim that git history proves the pre-registration is literal fact, not
+  marketing language.
+- **Fama-MacBeth t-stat**: `RESEARCH_REPORT.md` line 197 shows `mom_12_1` NW
+  t = **−0.67** in-sample — matches the card exactly.
+- **OOS net Sharpe**: line 246, stitched OOS net Sharpe **+0.02** — matches.
+- **Skip-1 IC**: line 298 and line 331, `mom_1_0` IC = **−0.020** — matches
+  the card's "reversal, not continuation" claim word for word.
+- **Crash months**: line 299, worst months Feb-09 (−28%), Jan-09 (−21%),
+  Aug-02 (−19%) — the card quotes these three (of five reported) as the most
+  recognizable crash dates.
+- **Kellanova delisting**: confirmed in `data/loader.py` line 54, an inline
+  comment documenting the ticker was delisted in the 2025 Mars acquisition
+  before the initial data download — this happened live during the build
+  session, not a hypothetical example.
+- **14/14 tests**: re-ran `pytest tests/ -q` in this session — **14 passed**,
+  0 failed, confirming the count independently rather than trusting the prior
+  session's report.
+
+### Link verification — all nine resolve
+
+Ran `git ls-remote` against all eight project repos plus the special
+`BrandonKKY` profile repo:
+
+```
+quantbot: LIVE
+stat-arb-research: LIVE
+cpp-options-pricer: LIVE
+portfolio-risk-dashboard: LIVE
+fed-sentiment-research: LIVE
+order-book-simulator: LIVE
+ml-alpha-research: LIVE
+cross-sectional-momentum: LIVE
+BrandonKKY: LIVE
+```
+
+All nine resolve on GitHub, including `cross-sectional-momentum` — the repo
+was pushed to GitHub at some point after the local build session that created
+it (this session found it already live; no push was performed as part of this
+update).
+
+### Flags before publishing this update
+
+- **This session's `README.md` change IS committed locally**
+  (`3a160a9 "Add cross-sectional-momentum as eighth featured project"`) but
+  **has not been pushed**, per explicit instruction not to push. Run `git push`
+  from `C:\Users\Acer\OneDrive\Desktop\BrandonKKY-profile` when ready to
+  publish.
+- **LinkedIn URL and email**: these are now real values
+  (`linkedin.com/in/brandon-kky/`, `brandonkky@gmail.com`), not the placeholders
+  flagged in §2 — that flag is now stale and can be considered resolved, though
+  it was resolved in an earlier session, not this one.
+- **cpp-options-pricer's CI badge** — not re-checked this session; carried
+  forward from §4, still worth a final look before treating the whole
+  portfolio as publish-ready.
+- **"Currently running QuantBot live"** line — not re-verified this session;
+  same standing caveat as §4.
+- **Editorial judgment call flagged above** (skipping the redundant
+  `cross-sectional factor research` skill term): if a literal 1:1 match to the
+  task brief's wording is wanted instead, that's a one-line addition to the
+  Quantitative Methods line — flagging it here rather than silently deciding
+  and moving on.
